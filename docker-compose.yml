@@ -1,21 +1,25 @@
 ---
 services:
   torero:
-    image: ghcr.io/torerodev/torero-container:latest
-    container_name: torero
+    build:
+      context: .
+      dockerfile: Containerfile
+    container_name: torero-platform
     ports:
       - "22:22"                 # use when ENABLE_SSH_ADMIN=true
       - "8000:8000"             # use when ENABLE_API=true
+      - "8001:8001"             # use when ENABLE_UI=true
       - "8080:8080"             # use when ENABLE_MCP=true
     volumes:
       - ./data:/home/admin/data
     environment:
       - ENABLE_API=true         # enable and run torero api
       - API_PORT=8000           # api port
+      - ENABLE_UI=true          # enable torero-ui dashboard
+      - UI_PORT=8001            # dashboard port
+      - UI_REFRESH_INTERVAL=15  # faster refresh for demo
       - ENABLE_MCP=true         # enable torero-mcp server
       - ENABLE_SSH_ADMIN=true   # enable ssh admin at runtime
-      - OPENTOFU_VERSION=1.9.0  # override OpenTofu version at runtime (optional)
-      - PYTHON_VERSION=3.13.0
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "torero", "version"]
@@ -23,4 +27,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5s
-...
